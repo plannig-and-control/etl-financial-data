@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#other
+output/
+input/
+inputs.xlsx
+to-dos.txt
