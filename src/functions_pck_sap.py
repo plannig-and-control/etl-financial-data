@@ -99,6 +99,7 @@ def transform_df(df):
 
     #additional dataframe with new calculated "S9999"
     df_third_parties = pd.concat([df_F_blanks, df_F_ggcc])
+    print("nulls: ", df_third_parties[["D_CA", "D_DP", "D_PE", "D_RU", "D_AC", "D_FL", "D_AU"]].isnull().sum())
     df_third_parties = df_third_parties.groupby(["D_CA", "D_DP", "D_PE", "D_RU", "D_AC", "D_FL", "D_AU"], as_index=False).sum()
     df_third_parties.loc[:,"D_T1"] = "S9999"
     
@@ -120,7 +121,7 @@ def transform_df(df):
     df.drop(index_drop, axis=1, inplace=True)
     
     #rename columns
-    df = df.rename(columns={"D_AC": "AC", "D_FL": "FL", "D_AU": "AU", "D_T1": "T1"})
+    df = df.rename(columns={"D_T1": "T1"})
 
     return df
 
@@ -138,7 +139,7 @@ def scope_adding(df, df_scopes, scope_equivalences):
 '''
 def ytd_to_month(df_YTD_current_month, df_YTD_previous_month):
     df_final_current_month = pd.concat([df_YTD_current_month, df_YTD_previous_month])
-    df_final_current_month = df_final_current_month.groupby(['D_RU', 'AC', 'FL', 'AU', 'T1'], as_index=False).sum()
+    df_final_current_month = df_final_current_month.groupby(['D_RU', 'D_AC', 'D_FL', 'D_AU', 'T1'], as_index=False).sum()
     return df_final_current_month
 
 
@@ -213,7 +214,7 @@ def transform_sap(df, df_join, df_scopes, scope_equivalences, file_name, max_mon
     df.loc[:, numeric_fields] = df[numeric_fields].astype("float")
 
     #add AU column
-    df["AU"] = "0LIA01"
+    df["D_AU"] = "0LIA01"
     
     #join_df to lookup AC
     df = df.merge(df_join, on="G/L Account", how="left")
@@ -236,7 +237,7 @@ def transform_sap(df, df_join, df_scopes, scope_equivalences, file_name, max_mon
     df.loc[:, "T1"] = df["T1"].replace("nan", "S9999", regex=True)
     df["T1"].fillna("S9999", inplace = True) 
     
-    df["FL"] = "F10"
+    df["D_FL"] = "F10"
     
     df = df.astype({'G/L Account': 'str', "T1": "str", "Order": "str"})
     print(f"current shape: {df.shape}")
@@ -256,8 +257,8 @@ def df_query_gen(path_gl_ru):
     '''
     print(path_gl_ru)
     df_join = pd.read_excel(path_gl_ru, sheet_name="SAP", skiprows=[0], dtype={"Conta": "str", "Conta.1": "str"})
-    df_join = df_join.rename(columns={"Conta": "G/L Account", "Conta.1": "AC"}) 
-    df_join = df_join[["G/L Account", "AC"]]
+    df_join = df_join.rename(columns={"Conta": "G/L Account", "Conta.1": "D_AC"}) 
+    df_join = df_join[["G/L Account", "D_AC"]]
     return df_join
 
 def add_t1_cons_col(df, df_scopes):
@@ -267,24 +268,21 @@ def add_t1_cons_col(df, df_scopes):
     df["T1 Revised method (Closing)"].fillna("External", inplace = True) 
     return df
 
-
-# def codes_columns_adding(df, df_codes):
-#     df_codes = df_codes.rename(columns={"Reporting unit (code)": "Company Code"})
-#     df_codes = df_codes.drop_duplicates(subset ="Company Code", keep = "first")
-#     merging_columns = ["Company Code", "Reporting unit (description)", 'Revised method (Closing)', 'Revised Conso. (Closing)',
-#     'Revised Own. Int. (Closing)', 'Revised Fin. Int. (Closing)', "Scope", "D_CU"]
-#     df = df.merge(df_codes[merging_columns], on="Company Code", how="left")
-#     print(f"shape after merge: {df.shape}")
-#     return df
-
 def sap_dif_mag(df_pck, df_sap):
     #take only certain columns of df_sap and multiply by -1
-    df_sap_2 = df_sap[['D_RU', 'AC', 'FL', 'AU', 'T1', 'P_AMOUNT', 'Scope', 'D_PE']].copy()
+    df_sap_2 = df_sap[['D_RU', 'D_AC', 'D_FL', 'D_AU', 'T1', 'P_AMOUNT', 'D_SP', 'D_PE']].copy()
     df_sap_2.loc[:,"P_AMOUNT"] = df_sap_2['P_AMOUNT'].multiply(-1)
 
     #concat and groupby
     df_dif = pd.concat([df_pck, df_sap_2])
-    df_dif = df_dif.groupby(['D_RU', 'AC', 'FL', 'AU', 'T1', 'Scope', 'D_PE'], as_index=False).sum()
+
+    df_pck.to_csv("../output/df_pck.csv", index=False)
+    df_sap_2.to_csv("../output/df_sap_2.csv", index=False)
+
+    print("packages columns: ", df_pck.columns)
+    print("sap columns: ", df_sap_2.columns)
+    print("nulls: ", df_sap_2[['D_RU', 'D_AC', 'D_FL', 'D_AU', 'T1', 'D_SP', 'D_PE']].isnull().sum())
+    df_dif = df_dif.groupby(['D_RU', 'D_AC', 'D_FL', 'D_AU', 'T1', 'D_SP', 'D_PE'], as_index=False).sum()
     
     df_sap["Source"] = "SAP"
     df_dif["Source"] = "Differences"
@@ -299,7 +297,7 @@ def xlsx_to_csv(input_path, output_path, dtypes_sap):
     for file in files_input:
         file_name = str(file[:-4])
         if file_name+"csv" not in files_output:
-            df = pd.read_excel(os.path.join(input_path, file), dtype=dtypes_sap)
+            df = pd.read_excel(os.path.join(input_path, file), dtype=dtypes_sap, parse_dates=["Posting Date"])
             file_name = file_name+"csv"
             df.to_csv(os.path.join(output_path, file_name))
             print(str(file_name)+" created")

@@ -22,7 +22,7 @@ def main():
                 df["D_SP"] = re.match(r"^\S*", f).group()
                 df["SC"] = "Actual"
                 df["D_PE"] = pd.to_datetime(period, format="%Y%m%d")
-                df.to_csv(file_path[:-4]+"_out.csv", index=False)
+                df.to_csv(file_path[:-4]+".csv", index=False)
         
         #transform files inside LC folder
         folder_path_LC=os.path.join(folder_path, "LC")
@@ -38,15 +38,15 @@ def main():
                 df["D_PE"] = pd.to_datetime(period, format="%Y%m%d")
                 print(file_path)
                 try:
-                    df.to_csv(file_path[:-4]+"_out.csv", index=False)
+                    df.to_csv(file_path[:-4]+".csv", index=False)
                 except:
                     #load dataframe first to make it available in the hard disk
                     try:
-                        df2=read_any_YTD(file_path[:-4]+"_out.csv")
-                        df.to_csv(file_path[:-4]+"_out.csv", index=False)
+                        df2=read_any_YTD(file_path[:-4]+".csv")
+                        df.to_csv(file_path[:-4]+".csv", index=False)
                     except:
-                        df2=pd.read_csv(file_path[:-4]+"_out.csv")
-                        df.to_csv(file_path[:-4]+"_out.csv", index=False)
+                        df2=pd.read_csv(file_path[:-4]+".csv")
+                        df.to_csv(file_path[:-4]+".csv", index=False)
 if __name__=="__main__":
     print(__name__)
     main()

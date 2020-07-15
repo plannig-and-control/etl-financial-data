@@ -64,7 +64,11 @@ def main():
         #TO-DO: change this, as we already have January
         #January set to 0 because, as said before, February includes data for both Jan and Feb
         # df_pck.loc[df_pck["PE"] == "2020-01-01","P_AMOUNT"] = 0
+        df_pck.rename(columns={"Scope": "D_SP"}, inplace=True)
+        # df_pck = df_pck.merge(df_scopes[["D_RU", "D_PE", "D_CU"]], on=["D_RU", "D_PE"], how="left")
+        print(df_pck.isnull().sum())
         df_pck.to_csv(f"../output/monthly_pl&bs_pk_{year}.csv", index=False)
+        list_df_months=[]
         print(f"CSV correctly generated monthly_pl&bs_pk_{year}.csv")
 
     if program_mode in [0,2]:
@@ -91,12 +95,30 @@ def main():
             list_df_sap.append(df)
         
         df_final_sap = pd.concat(list_df_sap)
+        list_df_sap=[]
+        #renaming due to request -- check for consistency of whole program!!!!
+        # df_final_sap.rename(columns={"D_PE": "PE", "D_RU": "RU"}, inplace=True)
+        print(df_final_sap.columns)
+        df_final_sap = df_final_sap.rename(columns={"Scope": "D_SP"})
         print("Generating sap csv...")
         df_final_sap.to_csv(f"../output/sap_pl&bs_{year}.csv", index=False)
         print(f"CSV correctly generated as sap_pl&bs_{year}.csv")
 
     if (program_mode == 0):
         df_sap_dif = sap_dif_mag(df_pck, df_final_sap)
+
+        #interim renaming - TO-DO change after closing
+        df_sap_dif.rename(columns={"D_SP": "Scope", "D_PE": "PE", "D_AU": "AU", "D_AC": "AC", "D_RU": "RU", "D_FL": "FL"}, inplace=True)
+        
+        #assigning value 0 to start process of filtering g/l account values
+        df_sap_dif.reset_index(inplace=True, drop=True)
+        df_sap_dif.loc[df_sap_dif["Source"]=="Differences", "G/L Account"] = "0"
+        df_sap_dif.loc[:, "G/L Account"] = df_sap_dif["G/L Account"].astype("int64")
+        index_drop = df_sap_dif[(df_sap_dif["G/L Account"] > 8800000000) | (df_sap_dif["G/L Account"] == 2629900999)].index
+        df_sap_dif.drop(index_drop, inplace=True)
+        df_sap_dif.loc[:, "G/L Account"] = df_sap_dif["G/L Account"].astype("str")
+        
+        print(df_sap_dif.isnull().sum())
         print("Generating Packages&SAP csv...")
         df_sap_dif.to_csv(f"../output/monthly_pl&bs_pk&sap_{year}.csv", index=False)
         print(f"CSV correctly generated as monthly_pl&bs_pk&sap_{year}.csv")

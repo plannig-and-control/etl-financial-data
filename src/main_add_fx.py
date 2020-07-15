@@ -19,53 +19,55 @@ df_monthly = pd.read_csv(path_monthly_magnitude, parse_dates=["D_PE"], dtype={"D
 df_scopes_final = consolidate_scopes(path_scopes)
 
 #add currency to monthly report
-df_merged = df_monthly.merge(df_scopes_final[["D_RU", "D_CU", "D_PE"]], how="left", on=["D_RU", "D_PE"])
+df_merged_mag = df_monthly.merge(df_scopes_final[["D_RU", "D_CU", "D_PE"]], how="left", on=["D_RU", "D_PE"])
 
-#read and process FX files
-#eliminate budget rows
-df_fx=pd.read_excel(path_fx, sheet_name="FX")
-index_drop = df_fx[df_fx.Scenario == "Budget"].index
-df_fx.drop(index_drop, inplace=True)
-df_fx.reset_index(inplace=True, drop=True)
-
-#rename columns
-df_fx = df_fx.rename(columns={"FX_RATE_FINAL": "TC", "FX_RATE_AVG": "TMN", "PERIOD": "D_PE", "CURRENCY": "D_CU"})
-
-#eliminate rows with 2019 values
-index_drop = df_fx[df_fx.D_PE < "2019-12-01"].index
-df_fx.drop(index_drop, inplace=True)
-df_fx.reset_index(inplace=True, drop=True)
-
-#get opening FX column
-df_fx["TO"] = df_fx["D_CU"].apply(lambda x: get_opening_fx(x,"2020",df_fx))
-df_fx.loc[df_fx['D_PE'] < '2020-01-01', 'TO'] = None
+#generate dataframe with fx
+df_fx = process_fx(path_fx)
 
 #add FX columns and columns with with local currency values 
-df_merged = df_merged.merge(df_fx[["TC", "TMN", "D_PE", "D_CU", "TO"]], how="left", on=["D_PE", "D_CU"])
-df_merged["FX"] = np.where(df_merged["D_FL"] == "F00", df_merged["TO"], np.where(df_merged["D_FL"] == "F80", 0, df_merged["TMN"]))
-df_merged["FLOW_LC"] = df_merged["EUR_Amount"] * df_merged["FX"]
-df_merged["CLOSING_FX"] =  df_merged["EUR_Amount"] * df_merged["TC"]
+df_merged_mag = df_merged_mag.merge(df_fx[["TC", "TMN", "D_PE", "D_CU", "TO"]], how="left", on=["D_PE", "D_CU"])
+df_merged_mag["FX"] = np.where(df_merged_mag["D_FL"] == "F00", df_merged_mag["TO"], np.where(df_merged_mag["D_FL"] == "F80", 0, df_merged_mag["TMN"]))
+df_merged_mag["FLOW_LC"] = df_merged_mag["EUR_Amount"] * df_merged_mag["FX"]
+df_merged_mag["CLOSING_FX"] =  df_merged_mag["EUR_Amount"] * df_merged_mag["TC"]
 
-df_pck_sap=pd.read_csv(path_pck_sap, dtype={
-    "G/L Account": "str",
-    "Order": "str",
-    "Account": "str",
-    "Aggregate Cost Center": "str",
-    "Reversed with": "str",
-    "Item": "str"
-}, parse_dates=["PE"])
+#reading sap file
+df_pck_sap=pd.read_csv(path_pck_sap, dtype=dtypes_sap_transformed, parse_dates=["PE"])
 
 df_pck_sap = df_pck_sap.rename(columns={
     "RU": "D_RU",
     "AC": "D_AC",
     "AU": "D_AU",
     "FL": "D_FL",
-    "P_AMOUNT": "FLOW_LC"
-    
-})
+    "P_AMOUNT": "FLOW_LC",
+    "PE": "D_PE",
+    "Scope": "D_SP"
+    })
 
-df_pck_sap.loc[:, "PE"] = df_pck_sap.PE.dt.to_period('M').dt.to_timestamp('M')
-df_final = pd.concat([df_merged, df_pck_sap])
+# looking again for D_CU, as there are no values in Source==Differences
+# TO-DO volver a chequear las columnas CU_x y CU_y para ver que en Source=SAP son iguales
+df_merged_sap = df_pck_sap.merge(df_scopes_final[["D_RU", "D_CU", "D_PE"]], how="left", on=["D_RU", "D_PE"])
+df_merged_sap.drop(["D_CU_x"], axis=1, inplace=True)
+df_merged_sap.rename(columns={"D_CU_y":"D_CU"}, inplace=True)
+
+#converting P_AMOUNT to euros
+df_merged_sap = df_merged_sap.merge(df_fx[["TC", "TMN", "D_PE", "D_CU", "TO"]], how="left", on=["D_PE", "D_CU"])
+df_merged_sap["FX"] = np.where(df_merged_sap["D_FL"] == "F00", df_merged_sap["TO"], np.where(df_merged_sap["D_FL"] == "F80", 0, df_merged_sap["TMN"]))
+df_merged_sap["EUR_Amount"] = df_merged_sap["FLOW_LC"] / df_merged_sap["FX"]
+df_merged_sap["CLOSING_FX"] =  df_merged_sap["FLOW_LC"] / df_merged_mag["TC"]
+
+columns_in_common = ['FLOW_LC', 'T1', 'D_RU', 'D_AU', 'D_AC', 'D_PE', 'D_SP', 'D_FL', 'D_CU', 'EUR_Amount']
+grouping_cols = ['T1', 'D_RU', 'D_AU', 'D_AC', 'D_PE', 'D_SP', 'D_FL', 'D_CU']
+
+# TO-DO there cannot be nulls when grouping, check!
+df_grouped = pd.concat([df_merged_mag[columns_in_common], df_merged_sap[columns_in_common]])
+df_grouped = df_grouped.groupby(grouping_cols, as_index=False).sum()
+
+df_grouped["Source"] = "Differences Consol"
+df_final = pd.concat([df_grouped, df_merged_sap])
+
+col_drop = ["TC", "TMN", "TO", "FX", "CLOSING_FX"]
+df_final.drop(col_drop, axis=1, inplace=True)
+
 print("Generating csv...")
-df_final.to_csv("monthly_magnitude_pck_sap_2020.csv", index=False)
+df_final.to_csv("../output/monthly_magnitude_pck_sap_2020.csv", index=False)
 print("Csv generated.")

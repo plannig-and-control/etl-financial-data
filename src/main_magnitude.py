@@ -10,8 +10,9 @@ TO-DO create a log report to check if all files are in folders
 def main():
     #load paths
     path_magnitude=read_path(input_all_paths, "path_magnitude")
-    # output_path=read_path(input_all_paths, "output_path")
-    output_path= "../output/"
+    output_path=read_path(input_all_paths, "monthly_magnitude")
+    print(output_path)
+    # output_path= "../output/"
 
     #checking in folder how many months can be processed
     max_months = max([int(x) for x in os.listdir(path_magnitude)])
@@ -30,7 +31,6 @@ def main():
         if month == 1:
             for scope in scopes:
                 df_current_month = read_YTD(path_magnitude, month, scope)
-                print(df_current_month)
                 col_drop=["D_SP", "SC", "D_PE"]
                 df_current_month.drop(col_drop, axis=1, inplace=True)
                 df_add_to_list(list_df_individual, list_df_consolidated, df_current_month, scope, period)
@@ -64,7 +64,7 @@ def main():
     df_final = df_final[df_final["EUR_Amount"] != 0]
     print("Generating CSV...")
     file_name = f"monthly_pl&bs_{year}.csv"
-    df_final.to_csv(os.path.join(output_path, file_name), index=False)
+    df_final.to_csv(output_path, index=False)
     print("CSV successfully generated")
 
 if __name__ == "__main__":

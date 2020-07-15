@@ -10,9 +10,18 @@ def read_YTD(path, month, scope):
     '''
     print(f'**Reading {month} and scope {scope}**')
     folder = [folder for folder in os.listdir(path) if str(month).zfill(2) in folder][0]
-    file_csv = [file_csv for file_csv in os.listdir(os.path.join(path,folder)) if scope in file_csv and "out" in file_csv][0]
+    file_csv = [file_csv for file_csv in os.listdir(os.path.join(path,folder)) if scope in file_csv][0]
     path_file = os.path.join(path,folder,file_csv)
-    df = pd.read_csv(path_file)
+    print("path read: ", path_file)
+    df = pd.read_csv(path_file, dtype={
+        "RU": "str",
+        "AC": "str",
+        "AU": "str",
+        "FL": "str",
+        "D_LE": "str",
+        "D_NU": "str",
+        "D_SP": "str",
+    })
     #here we do try except to catch files encoded in utf-8 if there are any
     # try:
     #     df = pd.read_csv(path_file, encoding="utf-16")
@@ -24,6 +33,7 @@ def read_YTD(path, month, scope):
     #         df = pd.read_csv(path_file, encoding="utf-8", delimiter=";")
     
     print(f'**DataFrame for month {month} and scope {scope} succesfully read**')
+    df=df.astype({"D_NU": "str", "D_LE": "str"})
     return df
 
 def read_any_YTD(path):
@@ -113,6 +123,7 @@ def transform_df(df):
     df = df.drop(index_drop)
     df = pd.concat([df, df_third_parties])
     print("Transformation finalized")
+    
     return df
 
 def df_add_to_list(list_df_individual, list_df_consolidated, transformed_df, scope, period):
@@ -122,7 +133,7 @@ def df_add_to_list(list_df_individual, list_df_consolidated, transformed_df, sco
         list_df_individual.append(transformed_df)
     else:
         list_df_consolidated.append(transformed_df)
-
+    print("Balance in this dataframe: ", transformed_df.VL.sum())
 
 def ytd_to_month(df_YTD_current_month, df_YTD_previous_month):
     '''
@@ -143,9 +154,11 @@ def bridge_ind_cons(list_df_individual, list_df_consolidated, list_df_month):
     df.loc[:,"VL"] = df["VL"].multiply(-1)
     
     df_consolidated = pd.concat(list_df_consolidated)
+    df_consolidated=df_consolidated.astype({"D_NU": "str", "D_LE": "str"})
     df_consolidated = df_consolidated.loc[:,['RU', 'AC', 'T1', 'AU', 'FL', 'VL', 'PE', "D_LE", "D_NU"]]
     
     df_dif = pd.concat([df, df_consolidated])
+    df_dif=df_dif.astype({"D_NU": "str", "D_LE": "str"})
     df_dif = df_dif.groupby(['RU', 'AC', 'T1', 'AU', 'FL', 'PE', "D_LE", "D_NU"], as_index=False).sum()
     
     df_consolidated["Scope"] = "EDPR"
