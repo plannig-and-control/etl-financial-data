@@ -276,12 +276,10 @@ def sap_dif_mag(df_pck, df_sap):
     #concat and groupby
     df_dif = pd.concat([df_pck, df_sap_2])
 
-    df_pck.to_csv("../output/df_pck.csv", index=False)
-    df_sap_2.to_csv("../output/df_sap_2.csv", index=False)
-
     print("packages columns: ", df_pck.columns)
     print("sap columns: ", df_sap_2.columns)
     print("nulls: ", df_sap_2[['D_RU', 'D_AC', 'D_FL', 'D_AU', 'T1', 'D_SP', 'D_PE']].isnull().sum())
+    print("check D_AC nulls: ", df_sap.isnull().sum())
     df_dif = df_dif.groupby(['D_RU', 'D_AC', 'D_FL', 'D_AU', 'T1', 'D_SP', 'D_PE'], as_index=False).sum()
     
     df_sap["Source"] = "SAP"

@@ -19,9 +19,9 @@ def main():
     path_gl_ru = read_path(input_all_paths, "gl_ru")
     path_sap = read_path(input_all_paths, "sap_excel")
     path_sap_csv = read_path(input_all_paths, "sap_csv")
-
+    path_additional_scopes=r"C:\Users\E353952\Desktop\New folder (2)\L_FIN_EDPR_202005_SIM_A_v1.xlsm"
     #consolidating scopes file
-    df_scopes=consolidate_scopes(path_scopes)
+    df_scopes=consolidate_scopes(path_scopes, path_additional_scopes)
 
     if program_mode in [0,1]:
         #the code below generates a file for the packages

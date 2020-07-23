@@ -11,12 +11,13 @@ path_monthly_magnitude = read_path(input_all_paths, "monthly_magnitude")
 path_scopes = read_path(input_all_paths, "scopes")
 path_fx = read_path(input_all_paths, "fx")
 path_pck_sap = read_path(input_all_paths, "pck_sap")
+path_additional_scopes=r"C:\Users\E353952\Desktop\New folder (2)\L_FIN_EDPR_202005_SIM_A_v1.xlsm"
 
 #read monthly report csv
 df_monthly = pd.read_csv(path_monthly_magnitude, parse_dates=["D_PE"], dtype={"D_RU": "str", "T1": "str"})
 
 #consolidate scopes in one file
-df_scopes_final = consolidate_scopes(path_scopes)
+df_scopes_final = consolidate_scopes(path_scopes, path_additional_scopes)
 
 #add currency to monthly report
 df_merged_mag = df_monthly.merge(df_scopes_final[["D_RU", "D_CU", "D_PE"]], how="left", on=["D_RU", "D_PE"])
@@ -59,7 +60,17 @@ columns_in_common = ['FLOW_LC', 'T1', 'D_RU', 'D_AU', 'D_AC', 'D_PE', 'D_SP', 'D
 grouping_cols = ['T1', 'D_RU', 'D_AU', 'D_AC', 'D_PE', 'D_SP', 'D_FL', 'D_CU']
 
 # TO-DO there cannot be nulls when grouping, check!
-df_grouped = pd.concat([df_merged_mag[columns_in_common], df_merged_sap[columns_in_common]])
+
+df_merged_sap_negative = df_merged_sap.copy()
+df_merged_sap_negative.loc[:, "EUR_Amount"] = df_merged_sap_negative["EUR_Amount"].multiply(-1)
+df_merged_sap_negative.loc[:, "FLOW_LC"] = df_merged_sap_negative["FLOW_LC"].multiply(-1)
+
+print("columns mag: ", df_merged_mag[columns_in_common].columns)
+print("columns sap: ", df_merged_sap_negative[columns_in_common].columns)
+
+df_grouped = pd.concat([df_merged_mag[columns_in_common], df_merged_sap_negative[columns_in_common]])
+print("nulls check: ", df_grouped.isnull().sum())
+df_grouped.reset_index(drop=True, inplace=True)
 df_grouped = df_grouped.groupby(grouping_cols, as_index=False).sum()
 
 df_grouped["Source"] = "Differences Consol"
