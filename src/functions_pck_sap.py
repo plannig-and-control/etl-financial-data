@@ -202,11 +202,15 @@ def transform_sap(df, df_join, df_scopes, scope_equivalences, file_name, max_mon
     
     df = df[selection]
 
-    #format date column. NOTE: except has the format used in Greece SAP file sent on 28/04/2020
-    try:
-        df.loc[:,"Posting Date"] = pd.to_datetime(df["Posting Date"], format='%Y/%m/%d')
-    except:
-        df.loc[:,"Posting Date"] = pd.to_datetime(df["Posting Date"], format='%d/%m/%Y')
+    #Opening files contain a Posting Date 
+    if "OPENING" not in file_name:
+        #format date column. NOTE: except has the format used in Greece SAP file sent on 28/04/2020
+        try:
+            df.loc[:,"Posting Date"] = pd.to_datetime(df["Posting Date"], format='%Y/%m/%d')
+        except:
+            df.loc[:,"Posting Date"] = pd.to_datetime(df["Posting Date"], format='%d/%m/%Y')
+    else:
+        df.loc[:,"Posting Date"] = pd.to_datetime("2020-01-01", format='%Y/%m/%d')
 
     #correct numbers
     numeric_fields = ['Amount in local currency', 'Amount in doc. curr.', 'General ledger amount']
@@ -237,7 +241,10 @@ def transform_sap(df, df_join, df_scopes, scope_equivalences, file_name, max_mon
     df.loc[:, "T1"] = df["T1"].replace("nan", "S9999", regex=True)
     df["T1"].fillna("S9999", inplace = True) 
     
-    df["D_FL"] = "F10"
+    if "OPENING" not in file_name:
+        df["D_FL"] = "F10"
+    else:
+        df["D_FL"] = "F00"
     
     df = df.astype({'G/L Account': 'str', "T1": "str", "Order": "str"})
     print(f"current shape: {df.shape}")

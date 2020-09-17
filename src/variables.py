@@ -31,7 +31,7 @@ dtypes_sap={
     "Document Header Text": "str", 
     "Entry Date": "str",
     "Local Currency": "str",
-    "Posting Date": "str", 
+    # "Posting Date": "str", 
     "Reference": "str", 
     "Reversed with": "str",
     "Order": "string",
