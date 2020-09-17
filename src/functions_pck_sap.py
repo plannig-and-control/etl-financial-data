@@ -21,7 +21,7 @@ def read_scope(path,month):
     '''
     file = [file for file in os.listdir(path) if " "+str(month)+"M" in file][0]
     path_file = os.path.join(path,file)
-    df = pd.read_excel(path_file)
+    df = pd.read_csv(path_file)
     return df
 
 
@@ -276,12 +276,10 @@ def sap_dif_mag(df_pck, df_sap):
     #concat and groupby
     df_dif = pd.concat([df_pck, df_sap_2])
 
-    df_pck.to_csv("../output/df_pck.csv", index=False)
-    df_sap_2.to_csv("../output/df_sap_2.csv", index=False)
-
     print("packages columns: ", df_pck.columns)
     print("sap columns: ", df_sap_2.columns)
     print("nulls: ", df_sap_2[['D_RU', 'D_AC', 'D_FL', 'D_AU', 'T1', 'D_SP', 'D_PE']].isnull().sum())
+    print("check D_AC nulls: ", df_sap.isnull().sum())
     df_dif = df_dif.groupby(['D_RU', 'D_AC', 'D_FL', 'D_AU', 'T1', 'D_SP', 'D_PE'], as_index=False).sum()
     
     df_sap["Source"] = "SAP"
@@ -297,6 +295,7 @@ def xlsx_to_csv(input_path, output_path, dtypes_sap):
     for file in files_input:
         file_name = str(file[:-4])
         if file_name+"csv" not in files_output:
+            print("Converting ", file_name)
             df = pd.read_excel(os.path.join(input_path, file), dtype=dtypes_sap, parse_dates=["Posting Date"])
             file_name = file_name+"csv"
             df.to_csv(os.path.join(output_path, file_name))
