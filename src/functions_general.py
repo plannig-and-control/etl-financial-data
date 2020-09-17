@@ -22,7 +22,7 @@ def consolidate_scopes(path_scopes, path_additional_scopes):
 
     for folder in scope_folder_paths:
         files = os.listdir(folder)
-        scope_file = [x for x in files if "Scope " in x and ".xlsx" in x and "M" in x]
+        scope_file = [x for x in files if "Scope " in x and ".csv" in x and "M" in x]
         if len(scope_file) > 0:
             scope_files_paths.append(os.path.join(folder, scope_file[0]))
         
@@ -43,8 +43,10 @@ def consolidate_scopes(path_scopes, path_additional_scopes):
             "Scope": "str",
             "D_CU": "str"
         }
-
-        df_scope_month=pd.read_excel(path, dtype=dtypes)
+        try:
+            df_scope_month=pd.read_csv(path, dtype=dtypes)
+        except:
+            df_scope_month=pd.read_csv(path, dtype=dtypes, encoding="utf-16")
 
         #create column with period values
         month = re.search(r"[0-9]+M", path).group()

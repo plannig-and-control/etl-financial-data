@@ -21,7 +21,7 @@ def read_scope(path,month):
     '''
     file = [file for file in os.listdir(path) if " "+str(month)+"M" in file][0]
     path_file = os.path.join(path,file)
-    df = pd.read_excel(path_file)
+    df = pd.read_csv(path_file)
     return df
 
 
@@ -295,6 +295,7 @@ def xlsx_to_csv(input_path, output_path, dtypes_sap):
     for file in files_input:
         file_name = str(file[:-4])
         if file_name+"csv" not in files_output:
+            print("Converting ", file_name)
             df = pd.read_excel(os.path.join(input_path, file), dtype=dtypes_sap, parse_dates=["Posting Date"])
             file_name = file_name+"csv"
             df.to_csv(os.path.join(output_path, file_name))

@@ -133,3 +133,5 @@ output/
 input/
 inputs.xlsx
 to-dos.txt
+
+*.csv
