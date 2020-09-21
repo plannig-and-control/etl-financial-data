@@ -3,7 +3,7 @@ import os
 from variables import *
 from functions_pck_sap import *
 from functions_general import consolidate_scopes, read_path
-
+from playsound import playsound
 '''
 TO-DO create a log report to check if all files are in folders
 '''
@@ -125,3 +125,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    playsound("../input/bell_sound.wav")

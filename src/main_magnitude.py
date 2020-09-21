@@ -3,7 +3,7 @@ import os
 from functions_magnitude import *
 from functions_general import *
 from variables import *
-
+from playsound import playsound
 '''
 TO-DO create a log report to check if all files are in folders
 '''
@@ -69,3 +69,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    playsound("../input/bell_sound.wav")
