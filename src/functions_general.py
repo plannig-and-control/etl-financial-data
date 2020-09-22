@@ -120,3 +120,12 @@ def consolidate_scopes(path_scopes, path_additional_scopes):
         df_scope_total.reset_index(drop=True, inplace=True)
 
     return df_scope_total
+
+def col_to_category(df, cat_cols):
+    for column in cat_cols:
+        if df[column].dtypes.name != "category":
+            df[column] = df[column].astype('category')
+            if "-" not in df[column].dtypes.categories:
+                df[column] = df[column].cat.add_categories('-')
+            df[column].fillna("-", inplace=True)
+    return df

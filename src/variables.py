@@ -13,6 +13,21 @@ scope_equivalences = {
     "EDPR-BR": "BR"
 }
 
+#magnitude types
+dtypes_mag = {
+    "D_RU": "category",
+    "D_NU": "category",
+    "D_LE": "category",
+    "D_FL": "category",
+    "D_SP": "category",
+    "D_CO": "category",
+    "D_SC": "category",
+    "T1": "category",
+    "D_AU": "category",
+    "D_AC": "category",
+    "D_CU": "category"
+}
+
 #pre-transformed sap dtypes
 dtypes_sap={
     "G/L Account": "str", 
@@ -41,28 +56,38 @@ dtypes_sap={
 
 #post-transformed sap dtypes
 dtypes_sap_transformed={
-    "G/L Account": "str", 
-    "T1": "str",
-    "RU": "str",
+    "G/L Account": "category", 
+    "T1": "category",
+    "RU": "category",
     "Document Date": "str", 
     "Document Number": "str", 
     "Document type": "str", 
-    "AC": "str", 
+    "AC": "category", 
     "User Name": "str",
-    "Aggregate Cost Center": "str",
-    "Asset": "str",
-    "Customer": "str",
+    "Aggregate Cost Center": "category",
+    "Asset": "category",
+    "Customer": "category",
     "Vendor": "str",
-    "Document currency":"str",
+    "Document currency":"category",
     "Document Header Text": "str", 
     "Entry Date": "str",
     "Local Currency": "str",
     "Posting Date": "str", 
     "Reference": "str", 
     "Reversed with": "str",
-    "Order": "string",
-    "Item": "str",
-    "Profit Center": "str"
+    "Order": "category",
+    "Item": "category",
+    "Profit Center": "category",
+    "Scope": "category",
+    "Source": "category",
+    "D_NU": "category",
+    "Reporting unit (description)": "category",
+    "FL": "category",
+    "AU": "category",
+    "User Name": "category",
+    "D_CU": "category",
+    "Flow Type": "category",
+    "Material": "category"
     }
 
 #path to scopes
@@ -72,8 +97,8 @@ path_scopes=r"C:\Users\E353952\EDP\O365_P&C Corporate - 2020"
 path_monthly_magnitude=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output\monthly_pl&bs_2020.csv"
 
 #path to pck-sap csv
-path_pck_sap=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output\monthly_pl&bs_pk&sap_2020.csv"
-
+# path_pck_sap=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output\monthly_pl&bs_pk&sap_2020.csv"
+path_pck_sap = r"C:\Users\E353952\Desktop\p&c repos\etl-financial-data\output\monthly_pl&bs_pk&sap_2020.csv"
 #path to FX
 path_fx=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\MetaDataSources\FX\FX.xlsx"
 

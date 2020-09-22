@@ -118,6 +118,17 @@ def main():
         df_sap_dif.drop(index_drop, inplace=True)
         df_sap_dif.loc[:, "G/L Account"] = df_sap_dif["G/L Account"].astype("str")
         
+        col_drop = ["Year/month",
+        "General ledger amount",
+        "Account",
+        "Entry Date",
+        "Local Currency",
+        "Revised method (Closing)",
+        "Revised Own. Int. (Closing)",
+        "Revised Fin. Int. (Closing)",
+        "T1 Revised method (Closing)"
+        ]
+        df_sap_dif.drop(col_drop, axis=1, inplace=True)
         print(df_sap_dif.isnull().sum())
         print("Generating Packages&SAP csv...")
         df_sap_dif.to_csv(f"../output/monthly_pl&bs_pk&sap_{year}.csv", index=False)
