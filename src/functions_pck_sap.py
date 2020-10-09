@@ -1,5 +1,7 @@
 import pandas as pd
 import os
+import numpy as np
+import re
 
 ##ETL pipeline functions for packages
 
@@ -202,7 +204,10 @@ def transform_sap(df, df_join, df_scopes, scope_equivalences, file_name, max_mon
     
     df = df[selection]
 
-    #Opening files contain a Posting Date 
+    #Opening files contain a Posting Date
+    print(f"***{file_name}***")
+    print(df.dtypes)
+    print(df["Posting Date"].unique())
     if "OPENING" not in file_name:
         #format date column. NOTE: except has the format used in Greece SAP file sent on 28/04/2020
         try:
@@ -240,9 +245,16 @@ def transform_sap(df, df_join, df_scopes, scope_equivalences, file_name, max_mon
     df = add_t1_cons_col(df, df_scopes)
     df.loc[:, "T1"] = df["T1"].replace("nan", "S9999", regex=True)
     df["T1"].fillna("S9999", inplace = True) 
-    
+    df["Flow Type"].fillna("", inplace = True)
+
     if "OPENING" not in file_name:
-        df["D_FL"] = "F10"
+        df["D_FL"] = ""
+        df["D_FL"] = np.where(df["G/L Account"].str.startswith("R"), "F10", df["D_FL"])
+        df["D_FL"] = np.where(df["Flow Type"] == "120", "F20", df["D_FL"])
+        df["D_FL"] = np.where((df["G/L Account"].str.startswith(("A42", "A43", "A44")) & (df["Flow Type"] == "")), "F20", df["D_FL"])
+        df["D_FL"] = np.where((df["Flow Type"] == "") & (df["D_FL"] == ""), "F15", df["D_FL"])
+        df["D_FL"] = np.where(((df["Flow Type"].str.match("^F\d{2}$")) & (df["D_FL"] == "")), df["Flow Type"], df["D_FL"])
+        df["D_FL"] = np.where(((~df["Flow Type"].str.match("^F\d{2}$")) & (df["D_FL"] == "")), "F15", df["D_FL"])
     else:
         df["D_FL"] = "F00"
     
@@ -299,11 +311,14 @@ def sap_dif_mag(df_pck, df_sap):
 def xlsx_to_csv(input_path, output_path, dtypes_sap):
     files_input = os.listdir(input_path)
     files_output = os.listdir(output_path)
-    for file in files_input:
-        file_name = str(file[:-4])
+    for files in files_input:
+        file_name = str(files[:-4])
         if file_name+"csv" not in files_output:
             print("Converting ", file_name)
-            df = pd.read_excel(os.path.join(input_path, file), dtype=dtypes_sap, parse_dates=["Posting Date"])
+            excel_path = os.path.join(input_path, files)
+            print(excel_path)
+            df = pd.read_excel(excel_path, dtype=dtypes_sap, parse_dates=["Posting Date"])
+            print(df["Posting Date"].unique())
             file_name = file_name+"csv"
             df.to_csv(os.path.join(output_path, file_name))
             print(str(file_name)+" created")

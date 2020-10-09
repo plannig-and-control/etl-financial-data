@@ -88,7 +88,7 @@ def main():
         for files in files_sap:
 
             print(f"processinng {files}")
-            df = pd.read_csv(os.path.join(path_sap_csv, files), dtype=dtypes_sap)
+            df = pd.read_csv(os.path.join(path_sap_csv, files), dtype=dtypes_sap, parse_dates=["Posting Date"])
 
             # df.loc[df["Trading partner"].isnull() == False,"Trading partner"] = df["Trading partner"].str.replace(".0", "", regex=False)
             df = transform_sap(df, df_ru, df_scopes, scope_equivalences, files, max_months)

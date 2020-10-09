@@ -44,14 +44,13 @@ dtypes_sap={
     "Vendor": "str",
     "Document currency":"str",
     "Document Header Text": "str", 
-    "Entry Date": "str",
     "Local Currency": "str",
-    # "Posting Date": "str", 
     "Reference": "str", 
     "Reversed with": "str",
     "Order": "string",
     "Item": "str",
-    "Profit Center": "str"
+    "Profit Center": "str",
+    "Flow Type": "str"
     }
 
 #post-transformed sap dtypes
@@ -72,7 +71,6 @@ dtypes_sap_transformed={
     "Document Header Text": "str", 
     "Entry Date": "str",
     "Local Currency": "str",
-    "Posting Date": "str", 
     "Reference": "str", 
     "Reversed with": "str",
     "Order": "category",
@@ -87,7 +85,8 @@ dtypes_sap_transformed={
     "User Name": "category",
     "D_CU": "category",
     "Flow Type": "category",
-    "Material": "category"
+    "Material": "category",
+    "Flow Type": "category"
     }
 
 #path to scopes

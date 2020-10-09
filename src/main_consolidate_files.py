@@ -4,6 +4,9 @@ from functions_add_fx import *
 from functions_general import *
 from variables import *
 from playsound import playsound
+from datetime import datetime
+
+start_time = datetime.now().strftime("%H:%M:%S")
 
 #generate fx dataframe
 path_fx = read_path(input_all_paths, "fx")
@@ -205,7 +208,10 @@ for month in dict_monthly.keys():
         print("Treating sap part of dataframe...")
         df_prev_sap = dict_monthly[month-1][dict_monthly[month-1].Source=="SAP"].copy()
         df_prev_sap.loc[:, ["EUR_Amount"]] = df_prev_sap["EUR_Amount"].multiply(-1)
-        df_dif_sap = pd.concat([dict_monthly[month][selection_cols_sap][(dict_monthly[month].D_PE.dt.month < month) & (dict_monthly[month].Source=="SAP")], df_prev_sap[selection_cols_sap]], ignore_index=True)
+        df_dif_sap = pd.concat(
+            [dict_monthly[month][selection_cols_sap][(dict_monthly[month].D_PE.dt.month < month) & (dict_monthly[month].Source=="SAP")],
+            df_prev_sap[selection_cols_sap]],
+            ignore_index=True)
         df_dif_sap = df_dif_sap.groupby(grouping_cols_sap, as_index=False, observed=True).sum()
         df_current_sap = dict_monthly[month][(dict_monthly[month].D_PE.dt.month == month) & (dict_monthly[month].Source=="SAP")].copy()
         df_current_sap["D_RV"] = "Original"
@@ -228,7 +234,8 @@ for month in dict_monthly.keys():
         df_append = pd.concat([df_current, df_dif, df_current_sap, df_dif_sap], ignore_index=True)
         col_category = [key for key in dtypes_sap_transformed.keys() if dtypes_sap_transformed[key] == "category"]
         df_append = col_to_category(df_append, col_category)
-        
+        df_append = df_append[df_append.EUR_Amount != 0].reset_index(drop=True)
+
         #concat month
         print("Appending generated dataframes together")
         concat_dfs.append(df_append.copy())
@@ -254,7 +261,8 @@ df_dif = None
 df_append = None
 
 for i, df in enumerate(concat_dfs):
-    print(f"MONTH {i}: ", df.dtypes)
+    # print(f"MONTH {i}: ", df.dtypes)
+    print(df.info(memory_usage="deep"))
 
 print("Concat monthly dataframes...")
 df_sap_revalued = pd.concat(concat_dfs, ignore_index=True)
@@ -284,16 +292,22 @@ df_sap_revalued.reset_index(inplace=True, drop=True)
 
 print("Dropping zeros...")
 #drop 0 values
-index_drop = df_sap_revalued[df_sap_revalued.EUR_Amount == 0].index
-df_sap_revalued.drop(index_drop, inplace=True)
-df_sap_revalued.reset_index(inplace=True, drop=True)
+# index_drop = df_sap_revalued[df_sap_revalued.EUR_Amount == 0].index
+# df_sap_revalued.drop(index_drop, inplace=True)
+# df_sap_revalued.reset_index(inplace=True, drop=True)
+
+# df_sap_revalued = df_sap_revalued[df_sap_revalued.EUR_Amount != 0].reset_index(drop=True)
 
 
+#completing profit center column
+df_sap_revalued["Profit Center"] = df_sap_revalued["Profit Center"].astype("str")
+df_sap_revalued.loc[df_sap_revalued["Profit Center"] == "" , "Profit Center"] = df_sap_revalued.D_RU.astype("str")+"0000"
+df_sap_revalued.loc[df_sap_revalued["Profit Center"] == "-" , "Profit Center"] = df_sap_revalued.D_RU.astype("str")+"0000"
 
 
 
 df_sap_revalued.rename(columns={"FLOW_LC": "LC_AMOUNT"}, inplace=True)
-df_sap_revalued.to_csv("monthly_magnitude_sap_pck_2020.csv", index=False)
+df_sap_revalued.to_csv("../output/monthly_magnitude_sap_pck_2020.csv", index=False)
 
 print("******** DONE *********")
 
@@ -332,5 +346,16 @@ for element in grouping_elements:
 print("columns before groupby \n", list(df_sap_revalued.columns))
 print(columns_sap_revalued)
 df_sap_revalued = df_sap_revalued.groupby(columns_sap_revalued, as_index=False, dropna=False, observed=True).sum()
-df_sap_revalued.to_csv("monthly_magnitude_sap_pck_2020_lite.csv", index=False)
+df_sap_revalued.to_csv("../output/monthly_magnitude_sap_pck_2020_lite.csv", index=False)
+
+#create list of Profit Centers
+keep = ["D_RU", "Profit Center"]
+drop = [col for col in df_sap_revalued.columns if col not in keep]
+df_sap_revalued.drop(drop, inplace=True, axis=1)
+df_sap_revalued.drop_duplicates(subset=None, keep='first', inplace=True, ignore_index=True)
+df_sap_revalued.to_csv("../output/monthly_magnitude_sap_pck_2020_CeCo_list.csv", index=False)
+
+
+end_time = datetime.now().strftime("%H:%M:%S")
+print("Start time: ", start_time, "End time: ", end_time)
 playsound("../input/bell_sound.wav")
