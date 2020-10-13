@@ -4,11 +4,14 @@ from variables import *
 from functions_pck_sap import *
 from functions_general import consolidate_scopes, read_path
 from playsound import playsound
+from datetime import datetime
+
+
 '''
 TO-DO create a log report to check if all files are in folders
 '''
 def main():
-
+    start_time = datetime.now().strftime("%H:%M:%S")
     program_mode = int(input("Please select program mode: ")) #0: both pck and SAP; 1: only pck; 2: only SAP
     max_months = int(input("Please select latest month to run the program: "))
     list_df_months = []
@@ -20,6 +23,11 @@ def main():
     path_sap = read_path(input_all_paths, "sap_excel")
     path_sap_csv = read_path(input_all_paths, "sap_csv")
     path_additional_scopes=r"C:\Users\E353952\Desktop\New folder (2)\L_FIN_EDPR_202005_SIM_A_v1.xlsm"
+
+    #generating path_gl_ru path
+    gl_ru_filename="Mapeamento Conta Operacional SIM-F - Magnitude_LOI.xlsx"
+    path_gl_ru=os.path.join(path_gl_ru, str(max_months).zfill(2), gl_ru_filename)
+    
     #consolidating scopes file
     df_scopes=consolidate_scopes(path_scopes, path_additional_scopes)
 
@@ -133,7 +141,8 @@ def main():
         print("Generating Packages&SAP csv...")
         df_sap_dif.to_csv(f"../output/monthly_pl&bs_pk&sap_{year}.csv", index=False)
         print(f"CSV correctly generated as monthly_pl&bs_pk&sap_{year}.csv")
-
+        end_time = datetime.now().strftime("%H:%M:%S")
+        print("Start time: ", start_time, "End time: ", end_time)
 if __name__ == "__main__":
     main()
     playsound("../input/bell_sound.wav")

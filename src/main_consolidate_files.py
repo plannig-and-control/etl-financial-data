@@ -296,16 +296,20 @@ print("Dropping zeros...")
 # df_sap_revalued.drop(index_drop, inplace=True)
 # df_sap_revalued.reset_index(inplace=True, drop=True)
 
-# df_sap_revalued = df_sap_revalued[df_sap_revalued.EUR_Amount != 0].reset_index(drop=True)
-
+df_sap_revalued = df_sap_revalued[df_sap_revalued.EUR_Amount != 0].reset_index(drop=True)
+df_sap_revalued= df_sap_revalued[df_sap_revalued.EUR_Amount.abs() > 0.01].reset_index(drop=True)
 
 #completing profit center column
 df_sap_revalued["Profit Center"] = df_sap_revalued["Profit Center"].astype("str")
 df_sap_revalued.loc[df_sap_revalued["Profit Center"] == "" , "Profit Center"] = df_sap_revalued.D_RU.astype("str")+"0000"
 df_sap_revalued.loc[df_sap_revalued["Profit Center"] == "-" , "Profit Center"] = df_sap_revalued.D_RU.astype("str")+"0000"
 
+#filling GL Account == "-" or "0"
+df_sap_revalued["G/L Account"] = df_sap_revalued["G/L Account"].astype("str")
+df_sap_revalued.loc[df_sap_revalued["G/L Account"] == "-" , "G/L Account"] = df_sap_revalued.D_AC
+df_sap_revalued.loc[df_sap_revalued["G/L Account"] == "0" , "G/L Account"] = df_sap_revalued.D_AC
 
-
+print("Generating csv...")
 df_sap_revalued.rename(columns={"FLOW_LC": "LC_AMOUNT"}, inplace=True)
 df_sap_revalued.to_csv("../output/monthly_magnitude_sap_pck_2020.csv", index=False)
 
