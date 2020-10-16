@@ -129,3 +129,13 @@ def col_to_category(df, cat_cols):
                 df[column] = df[column].cat.add_categories('-')
             df[column].fillna("-", inplace=True)
     return df
+
+def summary_period(df, columns=["D_RU", "D_PE", "EUR_Amount"], adding_col="EUR_Amount", threshold=10, index=["D_RU"]):
+    '''Takes a dataframe and returns a summary by Reporting Unit and Period, also a dataframe filtering values
+    higher than threshold in absolute value'''
+    grouping_cols = [col for col in columns if col != adding_col]
+    df_sum = df[columns].groupby(grouping_cols, as_index=False).sum()
+    df_sum = df_sum.pivot(index=index, columns="D_PE", values="EUR_Amount")
+    df_sum.fillna(0, inplace=True)
+    df_sum_filter = df_sum[(df_sum.abs() >= threshold).any(1)]
+    return df_sum, df_sum_filter
