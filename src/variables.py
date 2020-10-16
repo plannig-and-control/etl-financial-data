@@ -90,16 +90,16 @@ dtypes_sap_transformed={
     }
 
 #path to scopes
-path_scopes=r"C:\Users\E353952\EDP\O365_P&C Corporate - 2020"
+# path_scopes=r"C:\Users\E353952\EDP\O365_P&C Corporate - 2020"
 
 #path to magnitude monthly csv
-path_monthly_magnitude=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output\monthly_pl&bs_2020.csv"
+# path_monthly_magnitude=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output\monthly_pl&bs_2020.csv"
 
 #path to pck-sap csv
 # path_pck_sap=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output\monthly_pl&bs_pk&sap_2020.csv"
-path_pck_sap = r"C:\Users\E353952\Desktop\p&c repos\etl-financial-data\output\monthly_pl&bs_pk&sap_2020.csv"
+path_pck_sap = r"..\output\monthly_pl&bs_pk&sap_2020.csv"
 #path to FX
-path_fx=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\MetaDataSources\FX\FX.xlsx"
+# path_fx=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\MetaDataSources\FX\FX.xlsx"
 
 #output path
-output_path=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output"
+# output_path=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output"

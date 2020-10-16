@@ -14,7 +14,7 @@ df_fx = process_fx(path_fx)
 
 #generate scopes dataframe
 path_scopes = read_path(input_all_paths, "scopes")
-path_additional_scopes=r"C:\Users\E353952\Desktop\New folder (2)\L_FIN_EDPR_202005_SIM_A_v1.xlsm"
+path_additional_scopes=r"..\input\L_FIN_EDPR_202005_SIM_A_v1.xlsm"
 df_scopes_final = consolidate_scopes(path_scopes, path_additional_scopes)
 
 #generate sap part of dataframe

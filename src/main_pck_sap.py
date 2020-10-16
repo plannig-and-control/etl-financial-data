@@ -22,7 +22,7 @@ def main():
     path_gl_ru = read_path(input_all_paths, "gl_ru")
     path_sap = read_path(input_all_paths, "sap_excel")
     path_sap_csv = read_path(input_all_paths, "sap_csv")
-    path_additional_scopes=r"C:\Users\E353952\Desktop\New folder (2)\L_FIN_EDPR_202005_SIM_A_v1.xlsm"
+    path_additional_scopes=r"..\input\L_FIN_EDPR_202005_SIM_A_v1.xlsm"
 
     #generating path_gl_ru path
     gl_ru_filename="Mapeamento Conta Operacional SIM-F - Magnitude_LOI.xlsx"
