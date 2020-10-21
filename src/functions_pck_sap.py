@@ -201,13 +201,11 @@ def transform_sap(df, df_join, df_scopes, scope_equivalences, file_name, max_mon
         "Reversed with",
         "Item"
         ]
-    
-    df = df[selection]
+    col_drop = [col for col in df.columns if col not in selection]
+    df.drop(col_drop, axis=1, inplace=True)
 
     #Opening files contain a Posting Date
     print(f"***{file_name}***")
-    print(df.dtypes)
-    print(df["Posting Date"].unique())
     if "OPENING" not in file_name:
         #format date column. NOTE: except has the format used in Greece SAP file sent on 28/04/2020
         try:
@@ -227,8 +225,6 @@ def transform_sap(df, df_join, df_scopes, scope_equivalences, file_name, max_mon
     
     #join_df to lookup AC
     df = df.merge(df_join, on="G/L Account", how="left")
-    print(f"shape after merge: {df.shape}")
-    print(f"Codes before transformation: {df['Company Code'].unique()}")
 
     #create D_PE column
     df["D_PE"] = df["Posting Date"].dt.to_period('M').dt.to_timestamp()
@@ -249,21 +245,27 @@ def transform_sap(df, df_join, df_scopes, scope_equivalences, file_name, max_mon
 
     if "OPENING" not in file_name:
         df["D_FL"] = ""
-        df["D_FL"] = np.where(df["G/L Account"].str.startswith("R"), "F10", df["D_FL"])
-        df["D_FL"] = np.where(df["Flow Type"] == "120", "F20", df["D_FL"])
-        df["D_FL"] = np.where((df["G/L Account"].str.startswith(("A42", "A43", "A44")) & (df["Flow Type"] == "")), "F20", df["D_FL"])
+        df["D_FL"] = np.where(df["D_AC"].str.startswith("R"), "F10", df["D_FL"])
+        df["D_FL"] = np.where((df["Flow Type"] == "120") & (df["D_FL"] == ""), "F20", df["D_FL"])
+        df["D_FL"] = np.where((df["D_AC"].str.startswith(("A42", "A43", "A44")) & (df["Flow Type"] == "") & (df["D_FL"] == "")), "F20", df["D_FL"])
         df["D_FL"] = np.where((df["Flow Type"] == "") & (df["D_FL"] == ""), "F15", df["D_FL"])
-        df["D_FL"] = np.where(((df["Flow Type"].str.match("^F\d{2}$")) & (df["D_FL"] == "")), df["Flow Type"], df["D_FL"])
-        df["D_FL"] = np.where(((~df["Flow Type"].str.match("^F\d{2}$")) & (df["D_FL"] == "")), "F15", df["D_FL"])
+        df["D_FL"] = np.where(((df["Flow Type"].str.match(r"^F\d{2}$")) & (df["D_FL"] == "")), df["Flow Type"], df["D_FL"])
+        df["D_FL"] = np.where(((~df["Flow Type"].str.match(r"^F\d{2}$")) & (df["D_FL"] == "")), "F15", df["D_FL"])
     else:
         df["D_FL"] = "F00"
     
     df = df.astype({'G/L Account': 'str', "T1": "str", "Order": "str"})
-    print(f"current shape: {df.shape}")
     
     #correct scopes
     df.loc[:,"Scope"] = df["Scope"].map(lambda x: scope_equivalences[x] if x in list(scope_equivalences.keys()) else "OTHER")
-    print(f"Codes after transformation: {df['D_RU'].unique()}")
+    
+    if len(list(df[df.D_AC.fillna("").str.startswith("R")].D_FL.unique())) > 1:
+        print("_*_*_ WARNING _*_*_", file_name)
+    
+    if "OPENING" in file_name:
+        df.drop(df[df.D_AC.fillna("").str.startswith("R")].index, inplace=True)
+        df.reset_index(inplace=True, drop=True)
+        print(df[df.D_AC.fillna("").str.startswith("R")])
     return df
 
 def df_codes_gen(path_scopes, month):

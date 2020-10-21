@@ -124,6 +124,7 @@ def main():
         df_sap_dif.loc[:, "G/L Account"] = df_sap_dif["G/L Account"].astype("int64")
         index_drop = df_sap_dif[(df_sap_dif["G/L Account"] > 8800000000) | (df_sap_dif["G/L Account"] == 2629900999)].index
         df_sap_dif.drop(index_drop, inplace=True)
+        df_sap_dif.reset_index(inplace=True, drop=True)
         df_sap_dif.loc[:, "G/L Account"] = df_sap_dif["G/L Account"].astype("str")
         
         col_drop = ["Year/month",

@@ -63,6 +63,7 @@ path_monthly_magnitude = read_path(input_all_paths, "monthly_magnitude")
 df_monthly = pd.read_csv(path_monthly_magnitude, parse_dates=["D_PE"], dtype=dtypes_mag)
 df_merged_mag = df_monthly.merge(df_scopes_final[["D_RU", "D_CU", "D_PE"]], how="left", on=["D_RU", "D_PE"])
 print(df_merged_mag.dtypes)
+
 #fillna for D_LE and D_NU
 df_merged_mag['D_LE'] = df_merged_mag['D_LE'].cat.add_categories('-')
 df_merged_mag['D_NU'] = df_merged_mag['D_NU'].cat.add_categories('-')
