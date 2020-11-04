@@ -56,7 +56,7 @@ def main():
     #applying final transformations
     df_final.loc[:,"VL"] = df_final["VL"].round(2)
     df_final["CO"] = "Consolidated"
-    df_final["SC"] = "Actual"
+    df_final["SC"] = read_path(input_all_paths, "scenario") #"Actual"
     df_final = df_final.add_prefix("D_")
     df_final = df_final.rename(columns={"D_T1": "T1", "D_VL": "EUR_Amount", "D_Scope": "D_SP", "D_D_LE": "D_LE", "D_D_NU": "D_NU"})
     df_final.loc[:, "D_PE"] = df_final.D_PE.astype("str")

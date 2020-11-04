@@ -20,7 +20,7 @@ def main():
             if df.shape[1] == 4:
                 df=transform_df(df)
                 df["D_SP"] = re.match(r"^\S*", f).group()
-                df["SC"] = "Actual"
+                df["SC"] = read_path(input_all_paths, "scenario") #"Actual"
                 df["D_PE"] = pd.to_datetime(period, format="%Y%m%d")
                 df.to_csv(file_path[:-4]+".csv", index=False)
         
@@ -34,7 +34,7 @@ def main():
             if df.shape[1] == 4:
                 df=transform_df(df)
                 df["D_SP"] = re.match(r"^\S*", f).group()
-                df["SC"] = "Actual"
+                df["SC"] = read_path(input_all_paths, "scenario") #"Actual"
                 df["D_PE"] = pd.to_datetime(period, format="%Y%m%d")
                 print(file_path)
                 try:
