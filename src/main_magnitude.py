@@ -11,6 +11,7 @@ def main():
     #load paths
     path_magnitude=read_path(input_all_paths, "path_magnitude")
     output_path=read_path(input_all_paths, "monthly_magnitude")
+    year = read_path(input_all_paths, "year")
     print(output_path)
     # output_path= "../output/"
 
