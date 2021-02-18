@@ -96,8 +96,8 @@ dtypes_sap_transformed={
 # path_monthly_magnitude=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output\monthly_pl&bs_2020.csv"
 
 #path to pck-sap csv
-# path_pck_sap=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output\monthly_pl&bs_pk&sap_2020.csv"
-path_pck_sap = r"..\output\monthly_pl&bs_pk&sap_2020.csv"
+path_pck_sap=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\DataSources\Actuals\Output\monthly_pl&bs_pk&sap_2020.csv"
+#path_pck_sap = r"..\output\monthly_pl&bs_pk&sap_2020.csv"
 #path to FX
 # path_fx=r"C:\Users\E353952\EDP\O365_P&C Data Lake - General\MetaDataSources\FX\FX.xlsx"
 

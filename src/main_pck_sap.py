@@ -89,6 +89,25 @@ def main():
         df_ru = df_query_gen(path_gl_ru)
         
         #converting excel files to csv
+        s1 = os.listdir(path_sap)
+        s2 = os.listdir(path_sap_csv)
+
+        for i, f in enumerate(s1):
+            if ".XLSX" in f:
+                value = f.replace(".XLSX", "")
+                s1[i] = value
+            elif ".xlsx" in f:
+                value = f.replace(".xlsx", "")
+                s1[i] = value
+        for i, f in enumerate(s2):
+            value = f.replace(".csv", "")
+            s2[i] = value
+
+        s1 = set(s1)
+        s2 = set(s2)
+
+        assert s1 == s2, "Warning, files in xlsx not coincide with csv files."
+
         xlsx_to_csv(path_sap, path_sap_csv, dtypes_sap)
         files_sap = [files for files in os.listdir(path_sap_csv) if "csv" in files]
 

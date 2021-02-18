@@ -62,6 +62,7 @@ df_merged_sap.D_NU = df_merged_sap.D_NU.astype('category')
 path_monthly_magnitude = read_path(input_all_paths, "monthly_magnitude")
 df_monthly = pd.read_csv(path_monthly_magnitude, parse_dates=["D_PE"], dtype=dtypes_mag)
 df_merged_mag = df_monthly.merge(df_scopes_final[["D_RU", "D_CU", "D_PE"]], how="left", on=["D_RU", "D_PE"])
+print(df_merged_mag.isnull().sum())
 print(df_merged_mag.dtypes)
 
 #fillna for D_LE and D_NU
@@ -74,8 +75,12 @@ df_merged_mag.D_NU.fillna("-", inplace=True)
 col_nulls=["D_RU", "D_AU", "D_AC", "D_PE", "D_SP", "D_FL", "D_CU", "D_LE", "D_NU"]
 print("####################################################\n")
 print("Check nulls, all should be 0:\n\n", df_merged_sap[col_nulls].isnull().sum())
+print("Check nulls, all should be 0:\n\n", df_merged_mag[col_nulls].isnull().sum())
 print("\n####################################################")
 
+df_merged_sap.to_csv("../output/check_sap.csv", index=False)
+df_merged_mag.to_csv("../output/check_mag.csv", index=False)
+breakpoint()
 #generate dictionary in which each element is accumulated SAP-Dif Consol-Dif Pck with column converted to each month's FX
 #previous step for revaluations calculation
 dict_monthly = {}

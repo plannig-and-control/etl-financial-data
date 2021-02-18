@@ -28,7 +28,7 @@ def process_fx(path_fx):
     df_fx = df_fx.rename(columns={"FX_RATE_FINAL": "TC", "FX_RATE_AVG": "TMN", "PERIOD": "D_PE", "CURRENCY": "D_CU"})
 
     #eliminate rows with 2019 values
-    index_drop = df_fx[df_fx.D_PE < "2019-12-01"].index
+    index_drop = df_fx[df_fx.D_PE < "2020-01-01"].index
     df_fx.drop(index_drop, inplace=True)
     df_fx.reset_index(inplace=True, drop=True)
 
